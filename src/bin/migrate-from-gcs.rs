@@ -221,8 +221,6 @@ async fn migrate_bundle(
                 .as_secs();
 
             print_migration_rate(payloads_migrated, elapsed);
-
-            payloads_migrated = 0; // Reset the counter
         }
     }
 
