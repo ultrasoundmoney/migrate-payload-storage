@@ -51,8 +51,9 @@ const GCS_BUCKET: &str = "execution-payload-archive";
 
 fn get_gcs_object_store() -> anyhow::Result<impl ObjectStore> {
     // We can't read directly from the gcs_store so mimic what it does. No need to blow up if we fail.
-    info!(gcs_bucket = "execution-payload-archive", "using GCS store");
-    let gcs_store = GoogleCloudStorageBuilder::from_env()
+    info!(gcs_bucket = GCS_BUCKET, "using GCS store");
+    let gcs_store = GoogleCloudStorageBuilder::new()
+        .with_service_account_path("./gcs_secret.json")
         .with_bucket_name(GCS_BUCKET)
         .build()?;
     Ok(gcs_store)
