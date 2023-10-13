@@ -239,16 +239,19 @@ async fn main() -> anyhow::Result<()> {
 
     // Initialize OVH object store
     let ovh = get_ovh_object_store()?;
+    debug!("initialized object stores");
 
+    debug!("listing day bundles");
     let day_bundle_meta_stream = gcs.list(None).await?;
     let mut day_bundle_metas = day_bundle_meta_stream.try_collect::<Vec<_>>().await?;
+    debug!("found {} day bundles", day_bundle_metas.len());
 
     let last_file = read_last_file()?;
 
     day_bundle_metas.retain(|file| file.location.to_string() > last_file);
 
     if day_bundle_metas.is_empty() {
-        // No new files to process
+        info!("no new files to process");
         return Ok(());
     }
 
