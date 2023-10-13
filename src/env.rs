@@ -1,7 +1,7 @@
 //! Fns to read variables from the environment more conveniently and help other functions figure
 //! out what environment they're running in.
 
-use std::{env, fmt::Display};
+use std::env;
 
 use lazy_static::lazy_static;
 use tracing::{debug, warn};
@@ -78,36 +78,6 @@ pub fn get_env() -> Env {
 
 pub fn get_env_bool(key: &str) -> bool {
     get_env_var(key).map_or(false, |var| var.to_lowercase() == "true")
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Network {
-    Mainnet,
-    Goerli,
-}
-
-impl Display for Network {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Network::Mainnet => write!(f, "mainnet"),
-            Network::Goerli => write!(f, "goerli"),
-        }
-    }
-}
-
-pub fn get_network() -> Network {
-    let network_str = get_env_var("NETWORK");
-    match network_str {
-        None => {
-            warn!("no NETWORK in env, assuming Mainnet");
-            Network::Mainnet
-        }
-        Some(str) => match str.to_lowercase().as_ref() {
-            "mainnet" => Network::Mainnet,
-            "goerli" => Network::Goerli,
-            _ => panic!("NETWORK present: {str}, but not one of [mainnet, goerli], panicking!"),
-        },
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -233,30 +203,5 @@ mod tests {
             obfuscate_if_secret(&blacklist, normal_key, "my_normal_value"),
             "my_normal_value"
         );
-    }
-
-    #[test]
-    fn test_get_network() {
-        std::env::set_var("NETWORK", "mainnet");
-        assert_eq!(get_network(), Network::Mainnet);
-
-        std::env::set_var("NETWORK", "goerli");
-        assert_eq!(get_network(), Network::Goerli);
-
-        std::env::set_var("NETWORK", "Mainnet");
-        assert_eq!(get_network(), Network::Mainnet);
-
-        std::env::set_var("NETWORK", "Goerli");
-        assert_eq!(get_network(), Network::Goerli);
-
-        std::env::remove_var("NETWORK");
-        assert_eq!(get_network(), Network::Mainnet);
-    }
-
-    #[test]
-    #[ignore = "this test breaks NETWORK for parallel tests"]
-    fn test_get_network_panics() {
-        std::env::set_var("NETWORK", "invalid_network");
-        get_network();
     }
 }
