@@ -11,7 +11,9 @@ use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use futures::{FutureExt, TryStreamExt};
 use lazy_static::lazy_static;
 use migrate_payload_archive::{env::ENV_CONFIG, log};
-use object_store::{aws::AmazonS3Builder, gcp::GoogleCloudStorageBuilder, ObjectMeta, ObjectStore};
+use object_store::{
+    aws::AmazonS3Builder, gcp::GoogleCloudStorageBuilder, ObjectMeta, ObjectStore, RetryConfig,
+};
 use serde::Serialize;
 use tokio::time::interval;
 use tokio_util::io::StreamReader;
@@ -55,6 +57,7 @@ fn get_gcs_object_store() -> anyhow::Result<impl ObjectStore> {
     let gcs_store = GoogleCloudStorageBuilder::new()
         .with_service_account_path("./gcs_secret.json")
         .with_bucket_name(GCS_BUCKET)
+        .with_retry(RetryConfig::default())
         .build()?;
     Ok(gcs_store)
 }
@@ -66,6 +69,7 @@ fn get_ovh_object_store() -> anyhow::Result<impl ObjectStore> {
     info!(endpoint, s3_bucket, "using OVH store");
     let s3_store = AmazonS3Builder::from_env()
         .with_bucket_name(s3_bucket)
+        .with_retry(RetryConfig::default())
         .build()?;
     Ok(s3_store)
 }
