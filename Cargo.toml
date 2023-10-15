@@ -1,6 +1,6 @@
 [package]
 name = "migrate-payload-archive"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
@@ -24,7 +24,10 @@ object_store = { version = "0.7.1", default-features = false, features = [
 	"aws",
 	"gcp",
 ] }
-serde = { version = "1.0.189", default-features = false, features = ["derive", "std"] }
+serde = { version = "1.0.189", default-features = false, features = [
+	"derive",
+	"std",
+] }
 serde_json = { version = "1.0.107", default-features = false, features = [
 	"alloc",
 	"std",
