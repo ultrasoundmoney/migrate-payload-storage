@@ -265,7 +265,7 @@ async fn main() -> anyhow::Result<()> {
                 let minute = slot_date_time.minute();
 
                 let path_string =
-                format!("old_formats/gcs/{year}/{month:02}/{day:02}/{hour:02}/{minute:02}/{slot}/{payload_id}-{block_hash}.json.gz");
+                format!("old_formats/gcs_v2/{year}/{month:02}/{day:02}/{hour:02}/{minute:02}/{slot}/{payload_id}-{block_hash}.json.gz");
                 let path = object_store::path::Path::from(path_string);
 
                 let payload_id = payload.id.clone();
