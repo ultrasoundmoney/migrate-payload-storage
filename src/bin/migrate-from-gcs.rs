@@ -195,7 +195,7 @@ async fn main() -> anyhow::Result<()> {
         let payload_stream = gcs.get(&object_meta.location).await?.into_stream();
         let reader = StreamReader::new(payload_stream);
 
-        const DECODED_BUFFER_SIZE: usize = 32;
+        const DECODED_BUFFER_SIZE: usize = 128;
         let (mut decoded_tx, decoded_rx) = channel(DECODED_BUFFER_SIZE);
 
         let handle = spawn_blocking(move || {
@@ -226,7 +226,7 @@ async fn main() -> anyhow::Result<()> {
             }
         });
 
-        const CONCURRENT_PUT_LIMIT: usize = 1;
+        const CONCURRENT_PUT_LIMIT: usize = 32;
 
         // Skip payloads that have already been processed.
         decoded_rx
