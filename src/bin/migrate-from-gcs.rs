@@ -195,6 +195,8 @@ async fn main() -> anyhow::Result<()> {
             let mut csv_reader = csv::Reader::from_reader(decoder);
             let mut iter = csv_reader.byte_records();
 
+            let mut batch = Vec::new();
+
             while let Some(record) = iter.next().transpose().unwrap() {
                 let execution_payload = {
                     unsafe {
@@ -213,7 +215,15 @@ async fn main() -> anyhow::Result<()> {
                     }
                 };
 
-                futures::executor::block_on(decoded_tx.send(execution_payload)).unwrap();
+                batch.push(execution_payload);
+
+                if batch.len() == 32 {
+                    for execution_payload in batch.drain(..) {
+                        futures::executor::block_on(decoded_tx.feed(execution_payload)).unwrap();
+                    }
+                    futures::executor::block_on(decoded_tx.flush()).unwrap();
+                    batch.clear();
+                }
             }
         });
 
