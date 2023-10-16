@@ -42,7 +42,7 @@ fn read_progress() -> anyhow::Result<Option<String>> {
 fn write_progress(last_file: &ObjectMeta) -> anyhow::Result<()> {
     info!(last_file = %last_file.location, "writing progress");
     let mut file = File::create(Path::new(PROGRESS_FILE_PATH))?;
-    let progress = format!("{}", last_file.location.to_string());
+    let progress = format!("{}", last_file.location);
     file.write_all(progress.as_bytes())?;
     Ok(())
 }
