@@ -322,7 +322,7 @@ async fn main() -> anyhow::Result<()> {
 
         // As we process concurrently on a sudden shut down, we may lose payloads we
         // processed before this one by skipping over them when we resume.
-        write_progress(&object_meta)?;
+        write_progress(object_meta)?;
     }
 
     Ok(())
