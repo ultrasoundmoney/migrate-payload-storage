@@ -188,7 +188,7 @@ async fn main() -> anyhow::Result<()> {
         let payload_stream = gcs.get(&object_meta.location).await?.into_stream();
         let reader = StreamReader::new(payload_stream);
 
-        const DECODED_BUFFER_SIZE: usize = 128;
+        const DECODED_BUFFER_SIZE: usize = 256;
         let (mut decoded_tx, mut decoded_rx) = channel(DECODED_BUFFER_SIZE);
 
         spawn_blocking(move || {
@@ -229,7 +229,7 @@ async fn main() -> anyhow::Result<()> {
             }
         });
 
-        const SLOT_BUNDLE_BUFFER_SIZE: usize = 32;
+        const SLOT_BUNDLE_BUFFER_SIZE: usize = 8;
         let (mut slot_bundle_tx, slot_bundle_rx) = channel(SLOT_BUNDLE_BUFFER_SIZE);
 
         spawn(async move {
