@@ -240,9 +240,9 @@ async fn main() -> anyhow::Result<()> {
                 let entry = slot_bundles.entry(payload_slot).or_insert_with(Vec::new);
                 entry.push(payload);
 
-                // Whenever we have more than 2 slots of payloads in the hashmap, we flush the
+                // Whenever we have more than 4 slots of payloads in the hashmap, we flush the
                 // oldest slot to the next stage of the pipeline.
-                if slot_bundles.len() > 2 {
+                if slot_bundles.len() > 4 {
                     let oldest_slot = slot_bundles.keys().min().unwrap().clone();
                     let oldest_slot_payloads = slot_bundles.remove(&oldest_slot).unwrap();
                     slot_bundle_tx.send(oldest_slot_payloads).await.unwrap();
