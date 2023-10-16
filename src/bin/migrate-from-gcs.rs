@@ -8,6 +8,8 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+use backoff::{backoff::Backoff, ExponentialBackoff};
+use bytes::Bytes;
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use flate2::{read::GzDecoder, write::GzEncoder, Compression};
 use futures::{channel::mpsc::channel, FutureExt, SinkExt, StreamExt, TryStreamExt};
@@ -248,7 +250,7 @@ async fn main() -> anyhow::Result<()> {
             }
         });
 
-        const CONCURRENT_PUT_LIMIT: usize = 16;
+        const CONCURRENT_PUT_LIMIT: usize = 8;
 
         slot_bundle_rx
             .map(Ok)
@@ -282,7 +284,18 @@ async fn main() -> anyhow::Result<()> {
                     .await
                     .unwrap();
 
-                ovh.put(&path, bytes_gz.into()).await.unwrap();
+
+                let mut backoff = ExponentialBackoff::default();
+                let bytes_gz_shared = Bytes::from(bytes_gz);
+                while let Err(err) = ovh.put(&path, bytes_gz_shared.clone()).await {
+                    if let Some(wait) = backoff.next_backoff() {
+                        tokio::time::sleep(wait).await;
+                        continue;
+                    }
+                    eprintln!("failed to execute OVH put operation: {}", err);
+                    break;
+                }
+
 
                 let payloads_migrated_count = payloads_migrated_counter.fetch_add(payloads_count, std::sync::atomic::Ordering::Relaxed);
 
