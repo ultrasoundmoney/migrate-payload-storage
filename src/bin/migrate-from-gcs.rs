@@ -21,7 +21,7 @@ use object_store::{
 use serde::Serialize;
 use tokio::{spawn, task::spawn_blocking, time::interval};
 use tokio_util::io::{StreamReader, SyncIoBridge};
-use tracing::{debug, info};
+use tracing::{debug, error, info, warn};
 
 const PROGRESS_FILE_PATH: &str = "progress.json";
 
@@ -289,10 +289,11 @@ async fn main() -> anyhow::Result<()> {
                 let bytes_gz_shared = Bytes::from(bytes_gz);
                 while let Err(err) = ovh.put(&path, bytes_gz_shared.clone()).await {
                     if let Some(wait) = backoff.next_backoff() {
+                        warn!("failed to execute OVH put operation: {}, retrying", err);
                         tokio::time::sleep(wait).await;
                         continue;
                     }
-                    eprintln!("failed to execute OVH put operation: {}", err);
+                    error!("failed to execute OVH put operation: {}", err);
                     break;
                 }
 
