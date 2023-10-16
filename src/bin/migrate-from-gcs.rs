@@ -243,7 +243,7 @@ async fn main() -> anyhow::Result<()> {
                 // Whenever we have more than 4 slots of payloads in the hashmap, we flush the
                 // oldest slot to the next stage of the pipeline.
                 if slot_bundles.len() > 4 {
-                    let oldest_slot = slot_bundles.keys().min().unwrap().clone();
+                    let oldest_slot = *slot_bundles.keys().min().unwrap();
                     let oldest_slot_payloads = slot_bundles.remove(&oldest_slot).unwrap();
                     debug!(slot = %oldest_slot, payloads_count = oldest_slot_payloads.len(), "flushing slot bundle");
                     slot_bundle_tx.send(oldest_slot_payloads).await.unwrap();
