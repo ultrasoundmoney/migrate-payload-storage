@@ -7,7 +7,7 @@ use std::{
 use object_store::ObjectMeta;
 use tracing::{debug, info};
 
-const PROGRESS_FILE_PATH: &str = "progress.json";
+const PROGRESS_FILE_PATH: &str = "progress";
 
 pub fn read_progress() -> anyhow::Result<Option<String>> {
     let progress_file_path = Path::new(PROGRESS_FILE_PATH);
