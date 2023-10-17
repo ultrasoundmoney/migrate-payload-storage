@@ -248,7 +248,7 @@ async fn main() -> anyhow::Result<()> {
                     let keys = slot_bundles.keys().cloned().collect::<Vec<_>>();
                     trace!("incomplete slot bundles hit limit: {:?}", keys);
                     let oldest_slot = keys.iter().min().unwrap();
-                    let oldest_slot_payloads = slot_bundles.remove(&oldest_slot).unwrap();
+                    let oldest_slot_payloads = slot_bundles.remove(oldest_slot).unwrap();
                     debug!(slot = %oldest_slot, payloads_count = oldest_slot_payloads.len(), "flushing slot bundle");
                     slot_bundle_tx.send(oldest_slot_payloads).await.unwrap();
                 }
