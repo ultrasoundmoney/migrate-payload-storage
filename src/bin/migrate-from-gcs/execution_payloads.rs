@@ -1,11 +1,11 @@
 use std::fmt;
 
 use csv::ByteRecord;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::slots::Slot;
 
-#[derive(Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct ExecutionPayload {
     block_hash: String,
     #[serde(skip_serializing)]
