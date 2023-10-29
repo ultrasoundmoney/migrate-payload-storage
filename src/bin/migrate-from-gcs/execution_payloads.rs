@@ -9,7 +9,8 @@ use crate::slots::Slot;
 pub struct ExecutionPayload {
     block_hash: String,
     #[serde(skip_serializing)]
-    id: String,
+    // When reading back from the ndjson file, we don't have the id.
+    id: Option<String>,
     inserted_at: String,
     payload: serde_json::Value,
     proposer_pubkey: String,
@@ -49,7 +50,7 @@ impl From<ByteRecord> for ExecutionPayload {
     fn from(value: ByteRecord) -> Self {
         Self {
             block_hash: String::from_utf8(value[4].into()).unwrap(),
-            id: String::from_utf8(value[0].into()).unwrap(),
+            id: Some(String::from_utf8(value[0].into()).unwrap()),
             inserted_at: String::from_utf8(value[1].into()).unwrap(),
             payload: serde_json::from_slice(&value[6]).unwrap(),
             proposer_pubkey: String::from_utf8(value[3].into()).unwrap(),
