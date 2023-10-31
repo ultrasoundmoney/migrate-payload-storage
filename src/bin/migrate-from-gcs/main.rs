@@ -25,7 +25,7 @@ use tokio::{
     time::interval,
 };
 use tokio_util::io::{StreamReader, SyncIoBridge};
-use tracing::{debug, error, info, warn};
+use tracing::{debug, info};
 
 fn print_rate(count: usize, duration_secs: u64) {
     let rate = count as f64 / duration_secs as f64;
@@ -181,18 +181,8 @@ async fn store_bundle(
     .unwrap();
 
     let op = || async {
-        ovh.put(&path, bytes_gz.clone()).await.map_err(|err| {
-            if err.to_string().contains("409 Conflict") {
-                warn!("failed to execute OVH put operation: {}, retrying", err);
-                backoff::Error::Transient {
-                    err,
-                    retry_after: None,
-                }
-            } else {
-                error!("failed to execute OVH put operation: {}", err);
-                backoff::Error::Permanent(err)
-            }
-        })
+        ovh.put(&path, bytes_gz.clone()).await?;
+        Ok(())
     };
     backoff::future::retry(ExponentialBackoff::default(), op).await?;
 
