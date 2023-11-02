@@ -247,7 +247,7 @@ async fn main() -> anyhow::Result<()> {
 
     if let Some(last_file) = progress.as_ref() {
         info!(last_file = %last_file, "resuming migration");
-        day_bundle_metas.retain(|file| file.location.to_string() >= *last_file);
+        day_bundle_metas.retain(|file| file.location.to_string() > *last_file);
     } else {
         info!("starting migration from scratch");
     }
