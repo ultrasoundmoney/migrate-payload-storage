@@ -76,13 +76,22 @@ pub fn get_env() -> Env {
     }
 }
 
-pub fn get_env_bool(key: &str) -> bool {
-    get_env_var(key).map_or(false, |var| var.to_lowercase() == "true")
+pub fn get_env_bool(key: &str) -> Option<bool> {
+    get_env_var(key).map(|var| match var.to_lowercase().as_str() {
+        "true" => true,
+        "false" => false,
+        "t" => true,
+        "f" => false,
+        "1" => true,
+        "0" => false,
+        str => panic!("invalid bool {str} for {key}"),
+    })
 }
 
 #[derive(Debug, Clone)]
 pub struct EnvConfig {
     pub env: Env,
+    pub log_json: bool,
     pub log_perf: bool,
     pub s3_bucket: String,
 }
@@ -90,7 +99,8 @@ pub struct EnvConfig {
 fn get_env_config() -> EnvConfig {
     EnvConfig {
         env: get_env(),
-        log_perf: get_env_bool("LOG_PERF"),
+        log_json: get_env_bool("LOG_JSON").unwrap_or(get_env() != Env::Dev),
+        log_perf: get_env_bool("LOG_PERF").unwrap_or(false),
         s3_bucket: get_env_var("S3_BUCKET").unwrap_or("block-submission-archive-dev".to_string()),
     }
 }
@@ -130,7 +140,7 @@ mod tests {
     #[test]
     fn test_get_env_bool_not_there() {
         let flag = get_env_bool("DOESNT_EXIST");
-        assert!(!flag);
+        assert_eq!(flag, None);
     }
 
     #[test]
@@ -138,7 +148,7 @@ mod tests {
         let test_key = "TEST_KEY_BOOL_TRUE";
         let test_value = "true";
         std::env::set_var(test_key, test_value);
-        assert!(get_env_bool(test_key));
+        assert_eq!(get_env_bool(test_key), Some(true));
     }
 
     #[test]
@@ -146,7 +156,7 @@ mod tests {
         let test_key = "TEST_KEY_BOOL_TRUE2";
         let test_value = "TRUE";
         std::env::set_var(test_key, test_value);
-        assert!(get_env_bool(test_key));
+        assert_eq!(get_env_bool(test_key), Some(true));
     }
 
     #[test]
@@ -154,7 +164,7 @@ mod tests {
         let test_key = "TEST_KEY_BOOL_FALSE";
         let test_value = "false";
         std::env::set_var(test_key, test_value);
-        assert!(!get_env_bool(test_key));
+        assert_eq!(get_env_bool(test_key), Some(false));
     }
 
     #[test]
