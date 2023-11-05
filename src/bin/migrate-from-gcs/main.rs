@@ -274,10 +274,10 @@ async fn main() -> anyhow::Result<()> {
 
         let payload_day_stream = gcs.get(&object_meta.location).await?.into_stream();
 
-        const DECODED_BUFFER_SIZE: usize = 256;
+        const DECODED_BUFFER_SIZE: usize = 128;
         let (payload_tx, payload_rx) = channel(DECODED_BUFFER_SIZE);
 
-        const SLOT_BUNDLE_BUFFER_SIZE: usize = 8;
+        const SLOT_BUNDLE_BUFFER_SIZE: usize = 6;
         let (slot_bundle_tx, slot_bundle_rx) = channel(SLOT_BUNDLE_BUFFER_SIZE);
 
         try_join!(
